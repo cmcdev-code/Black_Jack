@@ -4,6 +4,7 @@ import player
 import game_black_jack
 from card import *
 from chips import *
+from buttons import *
 
 
 
@@ -16,7 +17,7 @@ def main():
     # load and set the logo
     #logo = pygame.image.load("logo32x32.png")
     #pygame.display.set_icon(logo)
-    pygame.display.set_caption("minimal program")
+    pygame.display.set_caption("Black Jack")
      
     # create a surface on screen that has the size of 240 x 180
     screen = pygame.display.set_mode((680,680))
@@ -26,6 +27,71 @@ def main():
      
     screen.fill((3,180,60))
     
+    game, sprit_group, round_bets,round_started,player_hand_cards,dealer_hand_cards = init_game_variables()
+    while running:
+
+        if len(game.deck) >= game.decks_before_shuffle * 52 *game.decks:
+            game.init_card_deck()
+        if round_started==1:
+            player_hand_cards=[[]]
+            dealer_hand_cards=[]
+            dealer_card_shown=Card_sprites(game.dealer.cards[0][1].number,(400,100))
+
+            player_card_1_shown=Card_sprites(game.players.cards[0][0].number,(340,400))
+
+            player_card_2_shown=Card_sprites(game.players.cards[0][1].number,(390,400))
+            sprit_group.add(dealer_card_shown,player_card_1_shown,player_card_2_shown)
+
+            dealer_hand_cards.append(dealer_card_shown)
+
+            player_hand_cards[0].append(player_card_1_shown)
+            player_hand_cards[0].append(player_card_2_shown)
+
+            round_started=2
+
+        # event handling, gets all event from the event queue
+        for event in pygame.event.get():
+
+            # only do something if the event is of type QUIT
+            if event.type == pygame.QUIT:
+                # change the value to False, to exit the main loop
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                # Check if the left mouse button was clicked
+                mouse_pos = pygame.mouse.get_pos()
+                clicked_sprites = [sprite for sprite in sprit_group if sprite.rect.collidepoint(mouse_pos)]
+                if clicked_sprites:
+                    # At least one sprite was clicked
+                    if(str(clicked_sprites[0])=="<Chips_sprites Sprite(in 1 groups)>" and round_started==0):
+                        round_bets[0]=round_bets[0]+1
+                        print(clicked_sprites)
+                    if(str(clicked_sprites[0])=="<Start_button_sprite Sprite(in 1 groups)>" and round_started==0 and round_bets[0]+round_bets[1]+round_bets[2]!=0):
+                        if(game.players.check_money(round_bets[0],round_bets[1],round_bets[2])):
+                            round_started=1
+                            game.init_round_(round_bets[0],round_bets[1],round_bets[2])
+                            print(clicked_sprites)
+                        else:
+                            round_bets=[0,0,0]
+                            print("Bets reset")
+                    if(str(clicked_sprites[0])=="<Hit_button_sprite Sprite(in 1 groups)>" and round_started==2 and game.player_can_hit(0)):
+                        game.player_hit(0)
+                      
+                   
+                        new_local_card=Card_sprites(game.players.cards[0][-1].number,(player_hand_cards[0][-1].rect.center[0]+50,player_hand_cards[0][-1].rect.center[1]))
+                        sprit_group.add(new_local_card)
+                        player_hand_cards[0].append(new_local_card)
+
+                    
+                    
+
+        sprit_group.update()
+        sprit_group.draw(screen)
+
+
+       # screen.fill((3,180,60))
+        pygame.display.flip()
+
+def init_game_variables():
     game=game_black_jack.Game(8,0.75,3/2,1,10,10,10)
 
     game.init_card_deck()
@@ -34,25 +100,24 @@ def main():
     chip_2=Chips_sprites(2,(330,570),5)
     chip_3=Chips_sprites(3,(380,570),5)
     
+    hit=Hit_button_sprite((140,630),2)
+    stand=Stand_button_sprite((220,630),2)
+    insure=Insure_button_sprite((300,630),2)
+    double=Double_button_sprite((380,630),2)
+    split=Split_button_sprite((460,630),2)
+    start= Start_button_sprite((540,630),2)
+
     sprit_group=pygame.sprite.Group()
 
-    sprit_group.add(chip_1,chip_2,chip_3)
-    
-    while running:
+    sprit_group.add(chip_1,chip_2,chip_3,hit,stand,insure,double,split,start)
+    round_bets=[0,0,0]
 
-        if len(game.deck) >= game.decks_before_shuffle * 52 *game.decks:
-            game.shuffle_deck()
-        
-        
-        # event handling, gets all event from the event queue
-        for event in pygame.event.get():
-            
-            # only do something if the event is of type QUIT
-            if event.type == pygame.QUIT:
-                # change the value to False, to exit the main loop
-                running = False
-        sprit_group.draw(screen)
-        pygame.display.flip()
+
+    player_hands_cards=[[]]
+    dealer_hand_cards=[]
+
+    round_started=0
+    return game,sprit_group,round_bets,round_started,player_hands_cards,dealer_hand_cards
 # run the main function only if this module is executed as the main script
 # (if you import this as a module then nothing is executed)
 if __name__=="__main__":

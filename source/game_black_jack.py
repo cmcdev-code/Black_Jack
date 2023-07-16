@@ -28,8 +28,9 @@ class Game:
             return False
 
     def init_card_deck(self)->None:
+        del self.deck[:]
         for i in range(self.decks* 52):
-            self.deck.append(card.Card(i % 53))
+            self.deck.append(card.Card(i % 52))
         self.shuffle_deck()
 
     def player_hit(self,hand)-> None:

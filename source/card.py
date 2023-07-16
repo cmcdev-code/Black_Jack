@@ -67,7 +67,7 @@ table = {
 class Card_sprites(pygame.sprite.Sprite):
     def __init__(self, card_number,pos):
         super(Card_sprites,self).__init__()
-        self.image=pygame.image.load(os.path.join("Pixel Playing Cards Pack",str(table[card_number])))
+        self.image=pygame.image.load(os.path.join("assets\\Pixel Playing Cards Pack",str(table[card_number])))
         self.rect=self.image.get_rect()
         self.rect.center=pos
 
