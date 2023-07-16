@@ -27,7 +27,7 @@ def main():
      
     screen.fill((3,180,60))
     
-    game, sprit_group, round_bets,round_started,player_hand_cards,dealer_hand_cards = init_game_variables()
+    game, sprit_group_list, round_bets,round_started,player_hand_cards,dealer_hand_cards,hand = init_game_variables()
     while running:
 
         if len(game.deck) >= game.decks_before_shuffle * 52 *game.decks:
@@ -37,11 +37,13 @@ def main():
             dealer_hand_cards=[]
             dealer_card_shown=Card_sprites(game.dealer.cards[0][1].number,(400,100))
 
-            player_card_1_shown=Card_sprites(game.players.cards[0][0].number,(340,400))
+            player_card_1_shown=Card_sprites(game.players.cards[0][0].number,(340,300))
 
-            player_card_2_shown=Card_sprites(game.players.cards[0][1].number,(390,400))
-            sprit_group.add(dealer_card_shown,player_card_1_shown,player_card_2_shown)
+            player_card_2_shown=Card_sprites(game.players.cards[0][1].number,(340,350))
+            local_sprit_group=pygame.sprite.Group()
+            local_sprit_group.add(dealer_card_shown,player_card_1_shown,player_card_2_shown)
 
+            sprit_group_list.append(local_sprit_group)
             dealer_hand_cards.append(dealer_card_shown)
 
             player_hand_cards[0].append(player_card_1_shown)
@@ -59,7 +61,7 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 # Check if the left mouse button was clicked
                 mouse_pos = pygame.mouse.get_pos()
-                clicked_sprites = [sprite for sprite in sprit_group if sprite.rect.collidepoint(mouse_pos)]
+                clicked_sprites = [sprite for sprite in sprit_group_list[0] if sprite.rect.collidepoint(mouse_pos)]
                 if clicked_sprites:
                     # At least one sprite was clicked
                     if(str(clicked_sprites[0])=="<Chips_sprites Sprite(in 1 groups)>" and round_started==0):
@@ -73,22 +75,32 @@ def main():
                         else:
                             round_bets=[0,0,0]
                             print("Bets reset")
-                    if(str(clicked_sprites[0])=="<Hit_button_sprite Sprite(in 1 groups)>" and round_started==2 and game.player_can_hit(0)):
-                        game.player_hit(0)
-                      
-                   
-                        new_local_card=Card_sprites(game.players.cards[0][-1].number,(player_hand_cards[0][-1].rect.center[0]+50,player_hand_cards[0][-1].rect.center[1]))
-                        sprit_group.add(new_local_card)
+
+                    if(str(clicked_sprites[0])=="<Hit_button_sprite Sprite(in 1 groups)>" and round_started==2 and game.player_can_hit(hand)):
+                        game.player_hit(hand)
+                        new_local_card=Card_sprites(game.players.cards[hand][-1].number,(player_hand_cards[hand][-1].rect.center[0],player_hand_cards[0][-1].rect.center[1]+50))
+                        sprit_group_list[1].add(new_local_card)
                         player_hand_cards[0].append(new_local_card)
+        if(game.players.bust(hand) and hand < (len(game.players.cards)-1)):
+            hand+=1
+        
 
+
+        if( not game.player_can_hit(hand) and hand<(len(game.players.cards)-1)):
+            hand+=1
+            print("Hand is now {}".format(hand))
+        
+
+        screen.fill((3,180,60))            
                     
-                    
+        for i in sprit_group_list:
+            i.update()
 
-        sprit_group.update()
-        sprit_group.draw(screen)
+        for i in sprit_group_list:
+            i.draw(screen)
 
 
-       # screen.fill((3,180,60))
+        
         pygame.display.flip()
 
 def init_game_variables():
@@ -116,8 +128,11 @@ def init_game_variables():
     player_hands_cards=[[]]
     dealer_hand_cards=[]
 
+    sprit_group_list=[sprit_group]
     round_started=0
-    return game,sprit_group,round_bets,round_started,player_hands_cards,dealer_hand_cards
+
+    hand=0
+    return game,sprit_group_list,round_bets,round_started,player_hands_cards,dealer_hand_cards,hand
 # run the main function only if this module is executed as the main script
 # (if you import this as a module then nothing is executed)
 if __name__=="__main__":
