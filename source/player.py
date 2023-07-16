@@ -4,11 +4,12 @@ import card
 class Player:
     def __init__(self,ones,twos,fives)->None:
         self.cards=[[]]
-        one_chips=ones
-        two_chips=twos
-        five_chips=fives
-    cards=[]
-    def add_card(self,hand,new_card)->None:
+        self.one_chips=ones
+        self.two_chips=twos
+        self.five_chips=fives
+        self.insurance_taken=False
+    
+    def add_card(self,hand,new_card: card.Card)->None:
         if hand >= len(self.cards) and hand == len(self.cards):
             local=[]
             local.append(new_card)
@@ -54,4 +55,18 @@ class Player:
         if len(self.cards[hand])>2 or self.get_hand_value(hand)!= 21:
             return False 
         else:
-            return self.cards[hand][0].is_jack_or_ace()+self.cards[hand][1].is_jack_or_ace()==3
+            return True
+    def split(self,hand,one,two,five)->None:
+        self.add_card(len(self.cards),self.cards[hand].pop())
+
+            
+    def can_split(self,hand,one,two,five)->bool:
+        if(len(self.cards[hand]==2 and self.check_money(one,two,five)) and (self.cards[hand][0] == self.cards[hand][1] or (self.cards[hand][0]+1)% (self.cards[hand][1]+1)==0 if self.cards[hand][0]< self.cards[hand][1] else (self.cards[hand][1]+1)% (self.cards[hand][0]+1)==0)):
+            return True
+        else:
+            return False
+        
+    def can_double(self,one,two,five)->bool:
+        return self.check_money(one,two,five)
+    def double_hand(self,hand,card):
+        self.add_card(hand,card)
