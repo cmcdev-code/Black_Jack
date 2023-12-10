@@ -1,5 +1,7 @@
 import pygame
 import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.join(script_dir, '..')
 class Card:
 
     def __init__(self,num)->None:
@@ -67,7 +69,7 @@ table = {
 class Card_sprites(pygame.sprite.Sprite):
     def __init__(self, card_number,pos):
         super(Card_sprites,self).__init__()
-        self.image=pygame.image.load(os.path.join("assets\\Pixel Playing Cards Pack",str(table[card_number])))
+        self.image=pygame.image.load(os.path.join(root_dir, "assets", "Pixel Playing Cards Pack", str(table[card_number])))
         self.rect=self.image.get_rect()
         self.rect.center=pos
 
